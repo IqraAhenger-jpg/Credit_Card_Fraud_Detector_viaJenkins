@@ -1,0 +1,167 @@
+import numpy as np
+
+import pandas as pd
+
+from sklearn.model_selection import train_test_split
+
+from sklearn.linear_model import LogisticRegression
+
+from sklearn.metrics import accuracy_score
+
+# loading dataset to a Pandas DataFrame
+credit_card_data = pd.read_csv('/content/credit_data.csv')
+
+import os
+
+# Ensure the /content/ directory exists
+if not os.path.exists('/content'):
+    os.makedirs('/content')
+
+# Create a dummy credit_data.csv file
+dummy_data = {
+    'Time': [0, 0, 1, 1, 2],
+    'V1': [ -0.263, 1.192, 1.258, -0.966, -1.02],
+    'V2': [ 1.15, 0.449, 1.057, 0.923, 0.45],
+    'Amount': [10.00, 25.00, 50.00, 75.00, 100.00],
+    'Class': [0, 0, 0, 1, 0]
+}
+df_dummy = pd.DataFrame(dummy_data)
+df_dummy.to_csv('/content/credit_data.csv', index=False)
+
+print("Dummy 'credit_data.csv' created successfully in /content/")
+
+# first 5 rows of the dataset
+credit_card_data.head()
+
+from sklearn.datasets import make_classification
+
+# Generate a larger synthetic dataset
+X, y = make_classification(n_samples=1000, n_features=20, n_informative=10, n_redundant=5, n_classes=2, random_state=42)
+
+# Convert to a Pandas DataFrame
+# For demonstration, let's create column names similar to the credit card data
+feature_cols = [f'V{i}' for i in range(1, 21)]
+synthetic_data = pd.DataFrame(X, columns=feature_cols)
+synthetic_data['Amount'] = np.random.rand(1000) * 1000 # Add a dummy 'Amount' column
+synthetic_data['Time'] = np.arange(1000) # Add a dummy 'Time' column
+synthetic_data['Class'] = y
+
+# Assign the new, larger dataset to credit_card_data
+credit_card_data = synthetic_data
+
+print(f"New credit_card_data shape: {credit_card_data.shape}")
+display(credit_card_data.head())
+
+credit_card_data.tail()
+
+#dataset information
+credit_card_data.info()
+
+#checking number of missing values in each column
+credit_card_data.isnull().sum()
+
+# distribution of legit transactions and fraudulent transactions
+credit_card_data['Class'].value_counts()
+
+ #this dataset is highly unbalanced
+
+# seperating the data for analysis
+legit = credit_card_data[credit_card_data.Class == 0]
+fraud = credit_card_data[credit_card_data.Class == 1]
+
+print(legit.shape)
+print(fraud.shape)
+
+# statistical measures of data
+legit.Amount.describe()
+
+fraud.Amount.describe()
+
+# compare the values for both transactions
+credit_card_data.groupby('Class').mean()
+
+import numpy as np
+import pandas as pd
+from sklearn.datasets import make_classification
+
+# Generate a larger synthetic dataset
+X, y = make_classification(n_samples=1000, n_features=20, n_informative=10, n_redundant=5, n_classes=2, random_state=42)
+
+# Convert to a Pandas DataFrame
+feature_cols = [f'V{i}' for i in range(1, 21)]
+synthetic_data = pd.DataFrame(X, columns=feature_cols)
+synthetic_data['Amount'] = np.random.rand(1000) * 1000
+synthetic_data['Time'] = np.arange(1000)
+synthetic_data['Class'] = y
+
+# Assign the new, larger dataset to credit_card_data
+credit_card_data = synthetic_data
+
+# Separate data for analysis
+legit = credit_card_data[credit_card_data.Class == 0]
+fraud = credit_card_data[credit_card_data.Class == 1]
+
+# Undersample the majority class (fraud) to match the minority class (legit)
+legit_df = legit # Keep all legitimate transactions
+fraud_df_undersampled = fraud.sample(n=len(legit), random_state=42) # Sample 'len(legit)' fraudulent transactions
+
+# Concatenate the two DataFrames to create a new balanced dataset
+balanced_dataset = pd.concat([legit_df, fraud_df_undersampled], axis=0)
+
+# Shuffle the balanced dataset
+balanced_dataset = balanced_dataset.sample(frac=1, random_state=42).reset_index(drop=True)
+
+print(f"Original dataset shape: {credit_card_data.shape}")
+print(f"Legitimate transactions shape: {legit_df.shape}")
+print(f"Undersampled fraudulent transactions shape: {fraud_df_undersampled.shape}")
+print(f"Balanced dataset shape: {balanced_dataset.shape}")
+print("\nValue counts of the 'Class' column in the balanced dataset:")
+print(balanced_dataset['Class'].value_counts())
+
+legit_sample = legit.sample(n=497)
+
+new_dataset = pd.concat([legit_sample, fraud], axis=0)
+
+new_dataset.head()
+
+new_dataset.tail()
+
+new_dataset['Class'].value_counts()
+
+new_dataset.groupby('Class').mean()
+
+
+X = new_dataset.drop(columns='Class', axis=1)
+Y = new_dataset['Class']
+
+print(X)
+
+print(Y)
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, stratify=Y, random_state=2)
+
+print(X.shape, X_train.shape, X_test.shape)
+
+from sklearn.linear_model import LogisticRegression
+model = LogisticRegression()
+
+# training the LogisticRegression model with training data
+model.fit(X_train, Y_train)
+
+from sklearn.metrics import accuracy_score
+# accuracy on training data
+X_train_prediction = model.predict(X_train)
+training_data_accuracy = accuracy_score(X_train_prediction, Y_train)
+
+print('Accuracy on Training data : ', training_data_accuracy)
+
+# accuracy on test data
+X_test_prediction = model.predict(X_test)
+test_data_accuracy = accuracy_score(X_test_prediction, Y_test)
+
+print ('Accuracy score on test data: ' , test_data_accuracy)
+
+!pip install matplotlib-venn
+
+!apt-get -qq install -y libfluidsynth1
